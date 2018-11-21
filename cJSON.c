@@ -113,11 +113,33 @@ static cJSON *cJSON_New_Item(void) {
 //	item->type=cJSON_Number;
 //	return num;
 //}
-//
-//static int pow2gt (int x)	{	--x;	x|=x>>1;	x|=x>>2;	x|=x>>4;	x|=x>>8;	x|=x>>16;	return x+1;	}
-//
-//typedef struct {char *buffer; int length; int offset; } printbuffer;
-//
+
+static int pow2gt(int x)    {   --x;    x|=x>>1;    x|=x>>2;    x|=x>>4;    x|=x>>8;    x|=x>>16;   return x+1;}
+
+
+static char *ensure(printbuffer *p, int needed) {
+    char *newbuffer;
+    int newsize;
+    if(!p || !p->buffer)
+        return 0;
+    needed += p->offset;
+    if(needed <= p->length)
+        return p->buffer + p->offset;   // There are enough free spaces in printbuffer p
+    newsize = pow2gt(needed);
+    newbuffer=(char*)cJSON_malloc(newsize);
+    if(!newbuffer) {
+        cJSON_free(p->buffer);
+        p->length=0;
+        p->buffer=0;
+        return 0;
+    }   // ? why free printbuffer p ?
+    if(newbuffer)
+        memcpy(newbuffer, p->buffer, p->length);
+    cJSON_free(p->buffer);
+    p->length = newsize;
+    p->buffer = newbuffer;
+    return newbuffer + p->offset;
+}
 //static char* ensure(printbuffer *p,int needed)
 //{
 //	char *newbuffer;int newsize;
@@ -174,6 +196,42 @@ static cJSON *cJSON_New_Item(void) {
 //	return str;
 //}
 //
+
+/* Render the number nicely from the given item into a string. */
+char *print_number(cJSON *item, printbuffer *p) {
+    char *str = 0;
+    double d = item->valuedouble;
+    if(d == 0) {
+        if(p)
+            str = ensure(p, 2);
+        else
+            str = (char*)cJSON_malloc(2);   /* special case for 0*/
+        if(str)
+            strcpy(str, "0");
+    } else if(fabs(((double)item->valueint)-d)<=DBL_EPSILON && d<=INT_MAX && d>=INT_MIN) {
+        if(p)
+            str = ensure(p, 21);
+        else
+            str = (char*)cJSON_malloc(21);  /* 2^64+1 can be represented in 21 chars. */
+        if(str)
+            sprintf(str, "%d", item->valueint);
+    } else {
+        if(p)
+            str = ensure(p, 64);
+        else
+            str = (char*)cJSON_malloc(64);  /* This is a nice tradeoff. */
+        if(str) {
+            if(fabs(floor(d)-d)<=DBL_EPSILON && fabs(d)<1.0e60)
+                sprintf(str, "%.0f", d);
+            else if(fabs(d)<1.0e-6 || fabs(d)>1.0e9)
+                sprintf(str, "%e", d);
+            else
+                sprintf(str, "%f", d);
+        }
+    }
+    return str;
+}
+
 //static unsigned parse_hex4(const char *str)
 //{
 //	unsigned h=0;

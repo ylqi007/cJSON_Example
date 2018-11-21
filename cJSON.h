@@ -56,6 +56,8 @@ typedef struct cJSON {
 	char *string;				/* The item's name string, if this item is the child of, or is in the list of subitems of an object. */
 } cJSON;
 
+typedef struct { char *buffer;  int length; int offset; } printbuffer;
+
 typedef struct cJSON_Hooks {
       void *(*malloc_fn)(size_t sz);
       void (*free_fn)(void *ptr);
@@ -131,6 +133,8 @@ The item->next and ->prev pointers are always zero on return from Duplicate. */
 extern cJSON *cJSON_ParseWithOpts(const char *value,const char **return_parse_end,int require_null_terminated);
 
 extern void cJSON_Minify(char *json);
+
+char *print_number(cJSON *item, printbuffer *p); // 20181120
 
 /* Macros for creating things quickly. */
 #define cJSON_AddNullToObject(object,name)		cJSON_AddItemToObject(object, name, cJSON_CreateNull())

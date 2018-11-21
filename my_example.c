@@ -23,6 +23,19 @@ void packet() {
     printf("%.2f\n", root->child->next->next->valuedouble);
     printf("size of root %d\n", cJSON_GetArraySize(root));
 
+    cJSON *num = cJSON_CreateNumber(10000000000.1);
+    printbuffer *p = 0;
+//    if(!p) {
+//        printf("%s", "p is not true");
+//    }
+    printf("%s\n", print_number(num, p));
+
+//    char *s = 0;
+//    printf("%ld\n", s);
+//    if(s)
+//        printf("\t%s\n", "This is True.");
+//    else
+//        printf("\t%s\n", "This is False.");
     //json_buffer = cJSON_Print(root);
     //printf("%s\n", json_buffer);
     //cJSON_Delete(root);
@@ -34,4 +47,23 @@ void unpacket() {
     //cJSON *name = cJSON_GetObjectItem(root, "name");
     //printf("name = %s\n", name->valuestring);
 
+}
+
+int sprintf_test() {
+    int sal;
+    char name[20];
+    char designation[30];
+    char info[60];
+
+    printf("Enter your name:\n");
+    gets(name);
+
+    printf("Enter your designation:\n");
+    gets(designation);
+
+    printf("Enter your salary:\n");
+    scanf("%d", &sal);
+
+    sprintf(info, "Welcome %s !\nName: %s \nDesignation: %s\nSalary: %d", name, name, designation, sal);
+    printf("\n\t%s\n", info);
 }
