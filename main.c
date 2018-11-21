@@ -10,5 +10,6 @@ int main()
     packet();
     //unpacket();
     //sprintf_test();
+    DBL_EPSILON_test();
     return 0;
 }

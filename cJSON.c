@@ -116,7 +116,6 @@ static cJSON *cJSON_New_Item(void) {
 
 static int pow2gt(int x)    {   --x;    x|=x>>1;    x|=x>>2;    x|=x>>4;    x|=x>>8;    x|=x>>16;   return x+1;}
 
-
 static char *ensure(printbuffer *p, int needed) {
     char *newbuffer;
     int newsize;
@@ -132,7 +131,7 @@ static char *ensure(printbuffer *p, int needed) {
         p->length=0;
         p->buffer=0;
         return 0;
-    }   // ? why free printbuffer p ?
+    }   // ? why free printbuffer p ? ==> newsize==0?
     if(newbuffer)
         memcpy(newbuffer, p->buffer, p->length);
     cJSON_free(p->buffer);
@@ -140,23 +139,7 @@ static char *ensure(printbuffer *p, int needed) {
     p->buffer = newbuffer;
     return newbuffer + p->offset;
 }
-//static char* ensure(printbuffer *p,int needed)
-//{
-//	char *newbuffer;int newsize;
-//	if (!p || !p->buffer) return 0;
-//	needed+=p->offset;
-//	if (needed<=p->length) return p->buffer+p->offset;
-//
-//	newsize=pow2gt(needed);
-//	newbuffer=(char*)cJSON_malloc(newsize);
-//	if (!newbuffer) {cJSON_free(p->buffer);p->length=0,p->buffer=0;return 0;}
-//	if (newbuffer) memcpy(newbuffer,p->buffer,p->length);
-//	cJSON_free(p->buffer);
-//	p->length=newsize;
-//	p->buffer=newbuffer;
-//	return newbuffer+p->offset;
-//}
-//
+
 //static int update(printbuffer *p)
 //{
 //	char *str;
@@ -219,7 +202,7 @@ char *print_number(cJSON *item, printbuffer *p) {
         if(p)
             str = ensure(p, 64);
         else
-            str = (char*)cJSON_malloc(64);  /* This is a nice tradeoff. */
+            str = (char*)cJSON_malloc(64);  /* This is a nice tradeoff? */
         if(str) {
             if(fabs(floor(d)-d)<=DBL_EPSILON && fabs(d)<1.0e60)
                 sprintf(str, "%.0f", d);
@@ -230,6 +213,49 @@ char *print_number(cJSON *item, printbuffer *p) {
         }
     }
     return str;
+}
+
+/* Parse the input text to generate a number, and populate the result into item. */
+const char *parse_number(cJSON *item, const char *num) {
+    printf("In parse_number function: %s\n", num);
+    double n=0, sign=1, scale=0;
+    int subscale=0, signsubscale=1;
+    printf("The number of n: %f\n", n);
+
+    if(*num=='-') sign=-1, num++;   /* Has sign? */
+    if(*num=='0') num++;            /* Is zero? */
+    if(*num>='1' && *num<='9') {
+        do {
+            n = (n*10.0) + (*num++ - '0');
+        } while(*num>='0' && *num<='9');    /* Number */
+    }
+    if(*num=='.' && num[1]>='0' && num[1]<='9') {
+        num++;
+        do {
+            n = (n*10.0) + (*num++ - '0');
+            scale--;
+        } while(*num>=0 && *num<='9');  /*Fractional part. */
+    }
+    if(*num=='e' || *num=='E') {
+        num++;
+        if(*num=='+')
+            num++;
+        else if(*num=='-') {
+            signsubscale = -1;
+            num++;      /* With sign. */
+        }
+        while(*num>='0' && *num<='9') {
+            subscale = (subscale*10) + (*num++ - '0');  /* scale number. */
+        }
+    }
+    n = sign*n*pow(10.0, (scale+subscale*signsubscale));    /* number = +/- num.fraction ( 10^(+/- exponent) */
+    item->valuedouble = n;
+    printf("The number of n: %d\n", n);
+    item->valueint = (int)n;
+    item->type = cJSON_Number;
+
+    printf("In parse_number function: %s\n", num);
+    return num;
 }
 
 //static unsigned parse_hex4(const char *str)
@@ -459,7 +485,24 @@ char *print_number(cJSON *item, printbuffer *p) {
 //	}
 //	return out;
 //}
-//
+
+/* Render a value to text. */
+char *print_value(cJSON *item, printbuffer *p) {
+    char *out = 0;
+    if(!item)
+        return 0;
+    if(p) {
+        switch((item->type)&255) {
+            case cJSON_Number:	out=print_number(item,p);break;
+        }
+    } else {
+        switch((item->type)&255) {
+            case cJSON_Number:	out=print_number(item,p);break;
+        }
+    }
+    return out;
+}
+
 ///* Build an array from input text. */
 //static const char *parse_array(cJSON *item,const char *value)
 //{

@@ -1,6 +1,9 @@
 /* https://blog.csdn.net/qq_27396861/article/details/54381576 */
 #include <string.h>
 
+#include <float.h>
+#include <limits.h>
+
 #include "cJSON.h"
 
 char *json_buffer;
@@ -23,12 +26,20 @@ void packet() {
     printf("%.2f\n", root->child->next->next->valuedouble);
     printf("size of root %d\n", cJSON_GetArraySize(root));
 
-    cJSON *num = cJSON_CreateNumber(10000000000.1);
+    cJSON *num = cJSON_CreateNumber(9.01);
     printbuffer *p = 0;
-//    if(!p) {
-//        printf("%s", "p is not true");
-//    }
-    printf("%s\n", print_number(num, p));
+    json_buffer = print_number(num, p);
+    printf("%s\n", json_buffer);
+
+    cJSON *unpacket_root;
+    char *pp;
+    pp = parse_number(unpacket_root, json_buffer);
+    printf("%s\n", pp);
+
+    printf("%f\n", unpacket_root->valuedouble);
+    //printf("%f", unpacket_root->valuedouble);
+
+
 
 //    char *s = 0;
 //    printf("%ld\n", s);
@@ -67,3 +78,16 @@ int sprintf_test() {
     sprintf(info, "Welcome %s !\nName: %s \nDesignation: %s\nSalary: %d", name, name, designation, sal);
     printf("\n\t%s\n", info);
 }
+
+void DBL_EPSILON_test() {
+    printf("The maximum value of float = %.10e\n", FLT_MAX);
+    printf("The minimum value of float = %.10e\n", FLT_MIN);
+
+    printf("The number of digits in the number = %.10e\n", FLT_MANT_DIG);
+    printf("The number DBL_EPSILON = %.34e\n", DBL_EPSILON);
+
+    printf("The value INT_MAX = %d\n", INT_MAX);
+    printf("The value INT_MIN = %d\n", INT_MIN);
+}
+
+
