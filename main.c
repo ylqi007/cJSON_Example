@@ -7,9 +7,9 @@
 int main()
 {
     printf("##### Hello World! #####\n\n");
-    packet();
+    str_packet();
     //unpacket();
     //sprintf_test();
-    DBL_EPSILON_test();
+    //DBL_EPSILON_test();
     return 0;
 }

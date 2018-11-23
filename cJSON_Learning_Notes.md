@@ -20,3 +20,7 @@ Implement the following functions:
 * const char *parse_number(cJSON *item, const char *num); // The returned `num` is different with the input argument `num`.
 eg. input "9.01000" and return `item->valuedouble=9.009995`.
 
+# 2018-11-22
+1. *C guarantees that zero is never a valid address for data, so a return value of zero can be used to signal an abnormal event, in this case no space.*
+> Pointers and integers are not interchangeable. Zero is the sole exception: the constant zero may be assigned to a pointer, and a pointer may be compared with the constant zero. The symbolic constant NULL is often used in place of zero, as a mnemonic to indicate more clearly that this is a special value for a pointer. NULL is defined in <stdio.h>. 
+2. `static char *print_string_ptr(const char *str, printbuffer *p);`  // Render the cstring provided to an escaped version that can be printed.
