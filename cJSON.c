@@ -69,7 +69,6 @@ static char *cJSON_strdup(const char *str) {
 //	cJSON_free	 = (hooks->free_fn)?hooks->free_fn:free;
 //}
 
-
 /* Internal constructor. */
 static cJSON *cJSON_New_Item(void) {
     cJSON *node = (cJSON*)cJSON_malloc(sizeof(cJSON));

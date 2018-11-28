@@ -8,6 +8,33 @@
 
 char *json_buffer;
 
+void cJSON_Object_test() {
+    cJSON *root = cJSON_CreateObject();
+    printf("The type of root: %d\n", root->type);       /* In cJSON.h, #define cJSON_Object 6 */
+    printf("%d\t%d\t%d\n", root->next, root->prev, root->child);
+    printf("%d\t%d\t%f\n", root->type, root->valueint, root->valuedouble);
+    printf("%d\t%d\n", root->string, root->valuestring);
+    printf("The size of cJSON: %d\n", sizeof(root));    /* root is a pointer pointing to a cJSON object, and it's size is 8 */
+    printf("The size of cJSON: %d\n", sizeof(cJSON));   /* cJSON is an struct, 56 */
+}
+
+void cJSON_Number_test() {
+    cJSON *num = cJSON_CreateNumber(9);
+    printf("The type of num: %d\n", num->type);       /* In cJSON.h, #define cJSON_Object 6 */
+    printf("%d\t%d\t%d\n", num->next, num->prev, num->child);
+    printf("%d\t%d\t%f\n", num->type, num->valueint, num->valuedouble);
+    printf("%d\t%d\n", num->string, num->valuestring);
+}
+
+void cJSON_String_test() {
+    char *test_string = "Hello, Yunlong.";
+    cJSON *str = cJSON_CreateString(test_string);
+    printf("The type of str: %d\n", str->type);       /* In cJSON.h, #define cJSON_Object 6 */
+    printf("%d\t%d\t%d\n", str->next, str->prev, str->child);
+    printf("%d\t%d\t%f\n", str->type, str->valueint, str->valuedouble);
+    printf("%d\t%s\n", str->string, str->valuestring);
+}
+
 void packet() {
     cJSON *root = cJSON_CreateObject();
 //    cJSON_AddItemToObject(root, "gender", cJSON_CreateNumber(1));
@@ -32,27 +59,8 @@ void packet() {
 //    json_buffer = cJSON_Print(num);
 //    printf("The value of jsonbuffer: %s\n", json_buffer);
 
-    //cJSON *unpacket_root;
-    //char *pp;
-    //pp = parse_number(unpacket_root, json_buffer);
-    //printf("%s\n", pp);
-    //printf("%f\n", unpacket_root->valuedouble);
-    //printf("%f", unpacket_root->valuedouble);
-
     cJSON *strItem = cJSON_CreateString("Tom");
     printf("%s", strItem->valuestring);
-
-
-
-//    char *s = 0;
-//    printf("%ld\n", s);
-//    if(s)
-//        printf("\t%s\n", "This is True.");
-//    else
-//        printf("\t%s\n", "This is False.");
-    //json_buffer = cJSON_Print(root);
-    //printf("%s\n", json_buffer);
-    //cJSON_Delete(root);
 }
 
 void str_packet() {
@@ -61,7 +69,7 @@ void str_packet() {
     cJSON_AddItemToObject(root, "age", cJSON_CreateNumber(27));
     printf("The object of root: %d\n", root->type);
     printf("The name of the first child: %s -- %s\n", root->child->string, root->child->valuestring);
-    //printf("The name of the second child: %s -- %d\n", root->child->next->string, root->child->next->valueint);
+    printf("The name of the second child: %s -- %d\n", root->child->next->string, root->child->next->valueint);
 
     //json_buffer = cJSON_Print(cJSON_CreateString("Yunlong\"Qi\"\t\\"));
     printf("####################################\n");

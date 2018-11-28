@@ -7,7 +7,10 @@
 int main()
 {
     printf("##### Hello World! #####\n\n");
-    str_packet();
+    //cJSON_Object_test();
+    //cJSON_Number_test();
+    cJSON_String_test();
+    //str_packet();
     //unpacket();
     //sprintf_test();
     //DBL_EPSILON_test();
