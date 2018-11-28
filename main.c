@@ -9,7 +9,9 @@ int main()
     printf("##### Hello World! #####\n\n");
     //cJSON_Object_test();
     //cJSON_Number_test();
-    cJSON_String_test();
+    //cJSON_String_test();
+    print_number_test();
+
     //str_packet();
     //unpacket();
     //sprintf_test();

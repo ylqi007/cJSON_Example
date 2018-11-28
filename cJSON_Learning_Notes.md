@@ -31,10 +31,19 @@ eg. input "9.01000" and return `item->valuedouble=9.009995`.
 
 # 2018-11-27
 1. `sizeof(cJSON)`
-	In the original code, the size of `cJSON` is 64 because of some padding bytes. I change the order of the elements in the definition of cJSON and the size changed to 56.
+	In the original code, the size of `cJSON` is 64 because of some padding bytes. I change the order of the elements in the definition of cJSON and the size changed to 56. [reference](https://stackoverflow.com/questions/119123/why-isnt-sizeof-for-a-struct-equal-to-the-sum-of-sizeof-of-each-member)
 2. `cJSON_CreateObject()` ==> `cJSON_Object_test()`;
 3. `cJSON_CreateNumber()` ==> `cJSON_Number_test()`;
 4. `cJSON_CreateString()` ==> `cJSON_String_test()`;
+* The `char *strcpy(char *s1, const char *s2)` function copies the string pointed to by *s2* **(including the terminating null character)** into the array pointed to by *s1*. If copying takes place between objects that overlap, the behavior is undefined.
+* The `void *memcpy(void *s1, const void *s2, size_t n)` function copies n characters from the object pointed to by *s2* into the object pointed to by *s1*. If copying takes place between objects that overlap, the behavior is undefined.
+* The `size_t strlen(const char *s)` function returns the number of characters *that precede the terminating null character*.
+* The `void *malloc(size_t size)` function allocates space for an object whose size is specified by size and whose value is indeterminate. The `malloc` function returns either a null pointer or a pointer to the allocated space.
+5. `print_number()` 
+* [Why 21 chars?](http://mathcentral.uregina.ca/QQ/database/QQ.02.06/trang1.html)
+
+
+
 
 
 

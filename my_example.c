@@ -35,6 +35,16 @@ void cJSON_String_test() {
     printf("%d\t%s\n", str->string, str->valuestring);
 }
 
+void print_number_test() {
+    printf("%.20e\n", DBL_EPSILON);
+    printf("The maximum value of integer: %d, the size of INT_MAX: %d\n", INT_MAX, sizeof(INT_MAX));
+    printf("The minimum value of integer: %d\n", INT_MIN);
+
+    cJSON *num = cJSON_CreateNumber(9.1);
+    char *s = cJSON_Print(num);
+    printf("%s\n", s);
+}
+
 void packet() {
     cJSON *root = cJSON_CreateObject();
 //    cJSON_AddItemToObject(root, "gender", cJSON_CreateNumber(1));

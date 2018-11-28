@@ -50,7 +50,7 @@ static char *cJSON_strdup(const char *str) {
     size_t len;
     char *copy;
 
-    len = strlen(str) + 1;
+    len = strlen(str) + 1;  /* The strlen() returns the number of characters that precede the terminating null character. */
     if(!(copy=(char*)cJSON_malloc(len)))
         return 0;
     memcpy(copy, str, len);
@@ -187,28 +187,20 @@ static int update(printbuffer *p) {
 //
 
 /* Render the number nicely from the given item into a string. */
-char *print_number(cJSON *item, printbuffer *p) {
+static char *print_number(cJSON *item, printbuffer *p) {
     char *str = 0;
-    double d = item->valuedouble;
-    if(d == 0) {
-        if(p)
-            str = ensure(p, 2);
-        else
-            str = (char*)cJSON_malloc(2);   /* special case for 0*/
-        if(str)
-            strcpy(str, "0");
+    double d = item->valuedouble;   /* The double value of this item. */
+    if(d==0) {  /* The special case for 0. */
+        if(p)   str = ensure(p, 2);
+        else    str = (char*)cJSON_malloc(2);
+        if(str) strcpy(str, "0");
     } else if(fabs(((double)item->valueint)-d)<=DBL_EPSILON && d<=INT_MAX && d>=INT_MIN) {
-        if(p)
-            str = ensure(p, 21);
-        else
-            str = (char*)cJSON_malloc(21);  /* 2^64+1 can be represented in 21 chars. */
-        if(str)
-            sprintf(str, "%d", item->valueint);
+        if(p)   str = ensure(p, 21);    /* 2^64+1 can be represented in 21 digits. */
+        else    str = (char*)cJSON_malloc(21);
+        if(str) sprintf(str, "%d", item->valueint);
     } else {
-        if(p)
-            str = ensure(p, 64);
-        else
-            str = (char*)cJSON_malloc(64);  /* This is a nice tradeoff? */
+        if(p)   str = ensure(p, 64);    /* This is a nice tradeoff. I don't know. */
+        else    str = (char*)cJSON_malloc(64);
         if(str) {
             if(fabs(floor(d)-d)<=DBL_EPSILON && fabs(d)<1.0e60)
                 sprintf(str, "%.0f", d);
