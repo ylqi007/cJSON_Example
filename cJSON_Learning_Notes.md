@@ -43,6 +43,16 @@ eg. input "9.01000" and return `item->valuedouble=9.009995`.
 * [Why 21 chars?](http://mathcentral.uregina.ca/QQ/database/QQ.02.06/trang1.html)
 
 
+# 2018-12-09
+1. Finished `print_string()` and collected into cJSON_Print();
+	* Don't understand `case u`;
+2. Finished `parse_string()` and `cJSON_Parse()`.
+	* `cJSON_Parse()`
+		|-> cJSON_ParseWithOpts()
+			|-> skip()
+			|-> cJSON_Delete()
+			|-> parse_value()	==> This is a top function constaining lots of subroutines to parse different kinds of value.
+
 
 
 

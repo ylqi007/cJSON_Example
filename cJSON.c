@@ -91,7 +91,20 @@ static cJSON *cJSON_New_Item(void) {
 //		c=next;
 //	}
 //}
-//
+/* Delete a cJSON structure. */
+void cJSON_Delete(cJSON *c) {
+    cJSON *next;
+    while(c) {
+        next = c->next;
+        if(!(c->type & cJSON_IsReference) && c->child) cJSON_Delete(c->child);
+        if(!(c->type & cJSON_IsReference) && c->valuestring) cJSON_free(c->valuestring);
+        if(!(c->type & cJSON_StringIsConst) && c->string) cJSON_free(c->string);
+        cJSON_free(c);
+        c = next;
+    }
+}
+
+
 ///* Parse the input text to generate a number, and populate the result into item. */
 //static const char *parse_number(cJSON *item,const char *num)
 //{
@@ -254,19 +267,6 @@ const char *parse_number(cJSON *item, const char *num) {
     return num;
 }
 
-//static unsigned parse_hex4(const char *str)
-//{
-//	unsigned h=0;
-//	if (*str>='0' && *str<='9') h+=(*str)-'0'; else if (*str>='A' && *str<='F') h+=10+(*str)-'A'; else if (*str>='a' && *str<='f') h+=10+(*str)-'a'; else return 0;
-//	h=h<<4;str++;
-//	if (*str>='0' && *str<='9') h+=(*str)-'0'; else if (*str>='A' && *str<='F') h+=10+(*str)-'A'; else if (*str>='a' && *str<='f') h+=10+(*str)-'a'; else return 0;
-//	h=h<<4;str++;
-//	if (*str>='0' && *str<='9') h+=(*str)-'0'; else if (*str>='A' && *str<='F') h+=10+(*str)-'A'; else if (*str>='a' && *str<='f') h+=10+(*str)-'a'; else return 0;
-//	h=h<<4;str++;
-//	if (*str>='0' && *str<='9') h+=(*str)-'0'; else if (*str>='A' && *str<='F') h+=10+(*str)-'A'; else if (*str>='a' && *str<='f') h+=10+(*str)-'a'; else return 0;
-//	return h;
-//}
-//
 static unsigned parse_hex4(const char *str) {
     unsigned h = 0;
     if(*str>='0' && *str<='9') h+=(*str)-'0'; else if(*str>='A' && *str<='F') h+=10+(*str)-'A'; else if(*str>='a' && *str<='f') h+=10+(*str)-'a'; else return 0;
@@ -474,34 +474,34 @@ static char *print_string_ptr(const char *str, printbuffer *p) {
 /* Call print_string_ptr (which is useful) on an item. */
 static char *print_string(cJSON *item, printbuffer *p) { return print_string_ptr(item->valuestring, p);}
 
-///* Predeclare these prototypes. */
-//static const char *parse_value(cJSON *item,const char *value);
+/* Predeclare these prototypes. */
+static const char *parse_value(cJSON *item, const char *value);
 static char *print_value(cJSON *item,int depth,int fmt,printbuffer *p);
 //static const char *parse_array(cJSON *item,const char *value);
 //static char *print_array(cJSON *item,int depth,int fmt,printbuffer *p);
 //static const char *parse_object(cJSON *item,const char *value);
 //static char *print_object(cJSON *item,int depth,int fmt,printbuffer *p);
-//
-///* Utility to jump whitespace and cr/lf */
-//static const char *skip(const char *in) {while (in && *in && (unsigned char)*in<=32) in++; return in;}
-//
-/* Parse an object - create a new root, and populate. */
-//cJSON *cJSON_ParseWithOpts(const char *value, const char **return_parse_end, int require_null_terminated) {
-//	const char *end=0;
-//	cJSON *c=cJSON_New_Item();
-//	ep=0;
-//	if (!c) return 0;       /* memory fail */
-//
-//	end=parse_value(c,skip(value));
-//	if (!end)	{cJSON_Delete(c);return 0;}	/* parse failure. ep is set. */
-//
-//	/* if we require null-terminated JSON without appended garbage, skip and then check for a null terminator */
-//	if (require_null_terminated) {end=skip(end);if (*end) {cJSON_Delete(c);ep=end;return 0;}}
-//	if (return_parse_end) *return_parse_end=end;
-//	return c;
-//}
-///* Default options for cJSON_Parse */
-//cJSON *cJSON_Parse(const char *value) {return cJSON_ParseWithOpts(value,0,0);}
+
+/* Utility to jump whitespace and cr/lf */
+static const char *skip(const char *in) {while (in && *in && (unsigned char)*in<=32) in++; return in;}
+
+/* Parse an object - Create a new root and populate. */
+cJSON *cJSON_ParseWithOpts(const char *value, const char **return_parse_end, int require_null_terminated) {
+    const char *end = 0;
+    cJSON *c = cJSON_New_Item();
+    ep = 0;
+    if(!c) return 0;    /* Memory fail. */
+
+    end = parse_value(c, skip(value));
+    if(!end) {cJSON_Delete(c); return 0;}   /* Parse failure. ep is set. */
+
+    /* If we require null-terminated JSON without appended garbage, skip and then check for a null terminator. */
+    if(require_null_terminated) {end=skip(end); if(*end) {cJSON_Delete(c); ep=end; return 0;}}
+    if(return_parse_end) *return_parse_end=end;
+    return c;
+}
+/* Default options for cJSON_Parse. */
+cJSON *cJSON_Parse(const char *value) {return cJSON_ParseWithOpts(value, 0, 0);}
 
 /* Render a cJSON item/entity/structure to text. */
 char *cJSON_Print(cJSON *item)              {return print_value(item, 0, 1, 0);}
@@ -532,7 +532,14 @@ char *cJSON_PrintUnformatted(cJSON *item)	{return print_value(item,0,0,0);}
 //
 //	ep=value;return 0;	/* failure. */
 //}
-//
+/* Parse core - When encountering text, process appropriately. */
+static const char *parse_value(cJSON *item, const char *value) {
+    if(!value)  return 0;   /* Fail on null. */
+    if(*value=='\"')    {return parse_string(item, value);}
+
+    ep=value; return 0; /* Failure. */
+}
+
 ///* Render a value to text. */
 //static char *print_value(cJSON *item,int depth,int fmt,printbuffer *p)
 //{
@@ -1090,54 +1097,3 @@ cJSON *cJSON_CreateObject(void) {
         item->type = cJSON_Object;
     return item;
 }
-
-///* Create Arrays: */
-////cJSON *cJSON_CreateIntArray(const int *numbers,int count)		{int i;cJSON *n=0,*p=0,*a=cJSON_CreateArray();for(i=0;a && i<count;i++){n=cJSON_CreateNumber(numbers[i]);if(!i)a->child=n;else suffix_object(p,n);p=n;}return a;}
-////cJSON *cJSON_CreateFloatArray(const float *numbers,int count)	{int i;cJSON *n=0,*p=0,*a=cJSON_CreateArray();for(i=0;a && i<count;i++){n=cJSON_CreateNumber(numbers[i]);if(!i)a->child=n;else suffix_object(p,n);p=n;}return a;}
-////cJSON *cJSON_CreateDoubleArray(const double *numbers,int count)	{int i;cJSON *n=0,*p=0,*a=cJSON_CreateArray();for(i=0;a && i<count;i++){n=cJSON_CreateNumber(numbers[i]);if(!i)a->child=n;else suffix_object(p,n);p=n;}return a;}
-////cJSON *cJSON_CreateStringArray(const char **strings,int count)	{int i;cJSON *n=0,*p=0,*a=cJSON_CreateArray();for(i=0;a && i<count;i++){n=cJSON_CreateString(strings[i]);if(!i)a->child=n;else suffix_object(p,n);p=n;}return a;}
-//
-///* Duplication */
-////cJSON *cJSON_Duplicate(cJSON *item,int recurse)
-////{
-////	cJSON *newitem,*cptr,*nptr=0,*newchild;
-////	/* Bail on bad ptr */
-////	if (!item) return 0;
-////	/* Create new item */
-////	newitem=cJSON_New_Item();
-////	if (!newitem) return 0;
-////	/* Copy over all vars */
-////	newitem->type=item->type&(~cJSON_IsReference),newitem->valueint=item->valueint,newitem->valuedouble=item->valuedouble;
-////	if (item->valuestring)	{newitem->valuestring=cJSON_strdup(item->valuestring);	if (!newitem->valuestring)	{cJSON_Delete(newitem);return 0;}}
-////	if (item->string)		{newitem->string=cJSON_strdup(item->string);			if (!newitem->string)		{cJSON_Delete(newitem);return 0;}}
-////	/* If non-recursive, then we're done! */
-////	if (!recurse) return newitem;
-////	/* Walk the ->next chain for the child. */
-////	cptr=item->child;
-////	while (cptr)
-////	{
-////		newchild=cJSON_Duplicate(cptr,1);		/* Duplicate (with recurse) each item in the ->next chain */
-////		if (!newchild) {cJSON_Delete(newitem);return 0;}
-////		if (nptr)	{nptr->next=newchild,newchild->prev=nptr;nptr=newchild;}	/* If newitem->child already set, then crosswire ->prev and ->next and move on */
-////		else		{newitem->child=newchild;nptr=newchild;}					/* Set newitem->child and move to it */
-////		cptr=cptr->next;
-////	}
-////	return newitem;
-////}
-//
-////void cJSON_Minify(char *json)
-////{
-//	char *into=json;
-//	while (*json)
-//	{
-//		if (*json==' ') json++;
-//		else if (*json=='\t') json++;	/* Whitespace characters. */
-//		else if (*json=='\r') json++;
-//		else if (*json=='\n') json++;
-//		else if (*json=='/' && json[1]=='/')  while (*json && *json!='\n') json++;	/* double-slash comments, to end of line. */
-//		else if (*json=='/' && json[1]=='*') {while (*json && !(*json=='*' && json[1]=='/')) json++;json+=2;}	/* multiline comments. */
-//		else if (*json=='\"'){*into++=*json++;while (*json && *json!='\"'){if (*json=='\\') *into++=*json++;*into++=*json++;}*into++=*json++;} /* string literals, which are \" sensitive. */
-//		else *into++=*json++;			/* All other characters. */
-//	}
-//	*into=0;	/* and null-terminate. */
-//}

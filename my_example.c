@@ -38,6 +38,18 @@ void cJSON_String_test() {
     printf("The value of valutdouble:\t%f\n", test->valuedouble);
     printf("The value of string:\t\t%s\n", test->string);
     printf("The value of valuestring:\t%s\n", test->valuestring);
+
+    printf("\nTest for cJSON_Parse():\n");
+    cJSON *test1 = cJSON_Parse(res);
+    printf("The type of test1:\t\t%d\n", test1->type);       /* In cJSON.h, #define cJSON_String 4 */
+    printf("The next element of test1:\t%p\n", (void*)test1->next);
+    printf("The prev element of test1:\t%p\n", (void*)test1->next);
+    printf("The child element of test1:\t%lu\n", (unsigned long int)test1->child);
+    printf("The type:\t\t\t%d\n", test1->type);
+    printf("The value of valutint:\t\t%d\n", test1->valueint);
+    printf("The value of valutdouble:\t%f\n", test1->valuedouble);
+    printf("The value of string:\t\t%s\n", test1->string);
+    printf("The value of valuestring:\t%s\n", test1->valuestring);
 }
 
 void cJSON_Object_test() {
