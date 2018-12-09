@@ -7,11 +7,17 @@
 int main()
 {
     printf("##### Hello World! #####\n\n");
+    /* Create cJSON objects with different types. */
+    cJSON_String_test();
+
+
+
     //cJSON_Object_test();
     //cJSON_Number_test();
-    //cJSON_String_test();
-    print_number_test();
 
+    //print_number_test();
+
+    /* Test for parse. */
     //str_packet();
     //unpacket();
     //sprintf_test();

@@ -76,6 +76,7 @@ static cJSON *cJSON_New_Item(void) {
         memset(node, 0, sizeof(cJSON));
     return node;
 }
+
 ///* Delete a cJSON structure. */
 //void cJSON_Delete(cJSON *c)
 //{
@@ -195,7 +196,7 @@ static char *print_number(cJSON *item, printbuffer *p) {
         else    str = (char*)cJSON_malloc(2);
         if(str) strcpy(str, "0");
     } else if(fabs(((double)item->valueint)-d)<=DBL_EPSILON && d<=INT_MAX && d>=INT_MIN) {
-        if(p)   str = ensure(p, 21);    /* 2^64+1 can be represented in 21 digits. */
+        if(p)   str = ensure(p, 21);    /* 2^64+1 can be represented in 21 digits. log(10)2^64=20 */
         else    str = (char*)cJSON_malloc(21);
         if(str) sprintf(str, "%d", item->valueint);
     } else {
@@ -330,67 +331,63 @@ const char *parse_number(cJSON *item, const char *num) {
 
 /* Render the cstring provided to an escaped version that can be printed. */
 static char *print_string_ptr(const char *str, printbuffer *p) {
-    const char *ptr;    // this pointer cannot change the contents pointed by this pointer.
+    const char *ptr;
     char *ptr2, *out;
     int len=0, flag=0;
     unsigned char token;
 
     for(ptr=str; *ptr; ptr++) {
-        flag |= ((*ptr>0 && *ptr<32) || (*ptr=='\"') || (*ptr=='\\')) ? 1 : 0;  // Check if there is any escaped character.
+        flag |= ((*ptr>0 && *ptr<32) || (*ptr=='\"') || (*ptr=='\\')) ? 1 : 0;
     }
-    if(!flag) {
-        len = ptr - str;
-        if(p)
-            out = ensure(p, len+3);
-        else
-            out = cJSON_malloc(len+3);
-        if(!out)
-            return 0;
-        ptr2 = out;
-        *ptr2++ = '\"';
+    if(!flag) {         /* Without escape characters. */
+        len = ptr-str;  /* The length without the terminal NULL. */
+        if(p) out=ensure(p, len+3); /* 2 chars for quotes and 1 for terminal null. */
+        else out=(char*)cJSON_malloc(len+3);
+        if(!out) return 0;
+        ptr2=out;
+        *ptr2++='\"';
         strcpy(ptr2, str);
-        ptr2[len] = '\"';
-        ptr2[len+1] = 0;
+        ptr2[len]='\"';
+        ptr2[len+1]=0;
         return out;
     }
-    if(!str) {
-        if(p)
-            out = ensure(p, 3);
-        else
-            out = (char*)cJSON_malloc(3);
+
+    if(!str) {  /* If str is null, then return "". */
+        if(p) out = ensure(p, 3);
+        else out = (char*)cJSON_malloc(3);
+        if(!out) return 0;
         strcpy(out, "\"\"");
         return out;
     }
-    ptr = str;
+
+    ptr=str;
     while((token=*ptr) && ++len) {
-        if(strchr("\"\\\b\f\n\r\t", token))
+        if(strchr("\"\\\b\f\n\r\t",token))
             len++;
         else if(token<32)
             len+=5;
         ptr++;
     }
-    if(p)
-        out = ensure(p, len+3);
-    else
-        out = cJSON_malloc(len+3);
-    if(!out)
-        return 0;
-    ptr = str; ptr2 = out;
-    *ptr2++ = '\"';
+    if(p)   out=ensure(p, len+3);
+    else    out=(char*)cJSON_malloc(len+3);
+    if(!out) return 0;
+
+    ptr2=out; ptr=str;
+    *ptr2++='\"';
     while(*ptr) {
-        if((unsigned char)*ptr>31 && *ptr!='\"' && *ptr!='\\') {
+        if((unsigned char)*ptr>31 && *ptr!='\"' && *ptr!='\\')
             *ptr2++=*ptr++;
-        } else {
+        else {
             *ptr2++='\\';
             switch(token=*ptr++) {
                 case '\\':  *ptr2++='\\';   break;
                 case '\"':  *ptr2++='\"';   break;
                 case '\b':  *ptr2++='b';    break;
-                case '\f':  *ptr2++='f';    break;
-                case '\n':  *ptr2++='n';    break;
-                case '\r':  *ptr2++='r';    break;
-                case '\t':  *ptr2++='t';    break;
-                default: sprintf(ptr2, "u%04x", token); ptr2+=5; break;     /* escape and print. */
+                case '\f':	*ptr2++='f';	break;
+				case '\n':	*ptr2++='n';	break;
+				case '\r':	*ptr2++='r';	break;
+				case '\t':	*ptr2++='t';	break;
+				default  :  sprintf(ptr2, "u%04x", token); ptr2+=5; break;  /* escape and print. */
             }
         }
     }
@@ -398,8 +395,7 @@ static char *print_string_ptr(const char *str, printbuffer *p) {
     *ptr2++=0;
     return out;
 }
-
-/* Invote print_string_ptr (which is useful) on an item. */
+/* Call print_string_ptr (which is useful) on an item. */
 static char *print_string(cJSON *item, printbuffer *p) { return print_string_ptr(item->valuestring, p);}
 
 ///* Predeclare these prototypes. */
