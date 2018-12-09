@@ -24,7 +24,20 @@ void cJSON_String_test() {
 
     /* Test print_string(). */
     char* res = cJSON_Print(str);
-    printf("\n%s\n", res);
+    printf("\n%s\n\n", res);
+
+    /* Test parse_string(). */
+    cJSON *test = cJSON_CreateObject();
+    parse_string(test, res);
+    printf("The type of test:\t\t%d\n", test->type);       /* In cJSON.h, #define cJSON_String 4 */
+    printf("The next element of test:\t%p\n", (void*)test->next);
+    printf("The prev element of test:\t%p\n", (void*)test->next);
+    printf("The child element of test:\t%lu\n", (unsigned long int)test->child);
+    printf("The type:\t\t\t%d\n", test->type);
+    printf("The value of valutint:\t\t%d\n", test->valueint);
+    printf("The value of valutdouble:\t%f\n", test->valuedouble);
+    printf("The value of string:\t\t%s\n", test->string);
+    printf("The value of valuestring:\t%s\n", test->valuestring);
 }
 
 void cJSON_Object_test() {

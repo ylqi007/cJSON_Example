@@ -137,6 +137,7 @@ extern void cJSON_Minify(char *json);
 //char *print_number(cJSON *item, printbuffer *p);        // 20181120
 //char *print_value(cJSON *item, printbuffer *p);         // 20181120
 const char *parse_number(cJSON *item, const char *num); // 20181121
+const char *parse_string(cJSON *item, const char *str); // 20181209
 
 /* Macros for creating things quickly. */
 #define cJSON_AddNullToObject(object,name)		cJSON_AddItemToObject(object, name, cJSON_CreateNull())
