@@ -74,16 +74,31 @@ void cJSON_Boolean_test() {
 }
 
 
-
+/* Object test. */
 void cJSON_Object_test() {
     cJSON *root = cJSON_CreateObject();
-    printf("The type of root: %d\n", root->type);       /* In cJSON.h, #define cJSON_Object 6 */
-    printf("%p\t%p\t%p\n", root->next, root->prev, root->child);
-    printf("%d\t%d\t%f\n", root->type, root->valueint, root->valuedouble);
-    printf("%p\t%s\n", root->string, root->valuestring);
-    printf("The size of cJSON: %zu\n", sizeof(root));    /* root is a pointer pointing to a cJSON object, and it's size is 8 */
-    printf("The size of cJSON: %zu\n", sizeof(cJSON));   /* cJSON is an struct, 56 */
+    printf("Type: %d\n", root->type);
+    cJSON_AddItemToObject(root, "Name", cJSON_CreateString("Yunlong Qi"));
+    printf("%s: %s\n", root->child->string, root->child->valuestring);
+    cJSON_AddItemToObject(root, "New Name", cJSON_CreateString("Alex"));
+    printf("%s: %s\n", root->child->next->string, root->child->next->valuestring);
+    cJSON_AddItemToObject(root, "Her Name", cJSON_CreateString("Zhu"));
+    printf("%s: %s\n", root->child->next->next->string, root->child->next->next->valuestring);
 }
+
+
+
+
+
+//void cJSON_Object_test() {
+//    cJSON *root = cJSON_CreateObject();
+//    printf("The type of root: %d\n", root->type);       /* In cJSON.h, #define cJSON_Object 6 */
+//    printf("%p\t%p\t%p\n", root->next, root->prev, root->child);
+//    printf("%d\t%d\t%f\n", root->type, root->valueint, root->valuedouble);
+//    printf("%p\t%s\n", root->string, root->valuestring);
+//    printf("The size of cJSON: %zu\n", sizeof(root));    /* root is a pointer pointing to a cJSON object, and it's size is 8 */
+//    printf("The size of cJSON: %zu\n", sizeof(cJSON));   /* cJSON is an struct, 56 */
+//}
 
 void cJSON_Number_test() {
     cJSON *num = cJSON_CreateNumber(9);

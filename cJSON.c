@@ -391,8 +391,8 @@ int cJSON_GetArraySize(cJSON *array) {
 
 /* Utility for array list handling. */
 static void suffix_object(cJSON *prev, cJSON *item) {
-    prev->next = item;
-    item->prev = prev;
+    prev->next=item;
+    item->prev=prev;
 }
 /* Utility for handling references. */
 
@@ -401,24 +401,17 @@ void cJSON_AddItemToArray(cJSON *array, cJSON *item) {
     cJSON *c = array->child;
     if(!item)
         return;
-    if(!c) {
+    if(!c)  // if array->child is NULL
         array->child = item;
-    } else {
+    else {
         while(c && c->next)
             c = c->next;
-        suffix_object(c, item);
+        suffix_object(c, item); // for now, c refers to the last element.
     }
 }
 
 /* Add item to object. */
-void cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item) {
-    if(!item)
-        return;
-    if(item->string)
-        cJSON_free(item->string);
-    item->string = cJSON_strdup(string);
-    cJSON_AddItemToArray(object, item);
-}
+void cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item) { if(!item) return;if(item->string)cJSON_free(item->string);item->string=cJSON_strdup(string);cJSON_AddItemToArray(object, item);}
 
 /* Replace array/object items with new ones. */
 cJSON *cJSON_CreateNumber(double num)           {cJSON *item=cJSON_New_Item(); if(item){item->type=cJSON_Number;item->valuedouble=num;item->valueint=(int)num;} return item;}
@@ -426,11 +419,5 @@ cJSON *cJSON_CreateString(const char *string)   {cJSON *item=cJSON_New_Item(); i
 cJSON *cJSON_CreateTrue(void)                   {cJSON *item=cJSON_New_Item(); if(item)item->type=cJSON_True; return item;}
 cJSON *cJSON_CreateFalse(void)                  {cJSON *item=cJSON_New_Item(); if(item)item->type=cJSON_False; return item;}
 cJSON *cJSON_CreateBool(int b)                  {cJSON *item=cJSON_New_Item(); if(item)item->type=b?cJSON_True:cJSON_False; return item;}
+cJSON *cJSON_CreateObject(void)                 {cJSON *item = cJSON_New_Item(); if(item)item->type = cJSON_Object;return item;}    //#define cJSON_Object 6
 
-/* Create cJSON of object type. */
-cJSON *cJSON_CreateObject(void) {
-    cJSON *item = cJSON_New_Item();
-    if(item)
-        item->type = cJSON_Object;
-    return item;
-}

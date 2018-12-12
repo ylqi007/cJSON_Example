@@ -1,11 +1,11 @@
 
-# 2018-11-19
+# 2018/11/19
 Implement the following functions:
 * cJSON_CreateObject()
 * cJSON_AddItemToObject()
 * cJSON_CreateNumber
 
-# 2018-11-20
+# 2018/11/20
 Implement the following functions:
 * char *print_number(cJSON *item, printbuffer *p);
 * static char *ensure(printbuffer *p, int needed);	--> This `ensure()` function allocates the needed memory.
@@ -15,12 +15,12 @@ Implement the following functions:
 
 * How to use header files? [header](https://gcc.gnu.org/onlinedocs/cpp/Header-Files.html#Header-Files) [header](http://www.gnu.org/software/libc/manual/html_node/Header-Files.html)
 
-# 2018-11-21
+# 2018/11/21
 * char *print_value(cJSON *item, printbuffer *p);
 * const char *parse_number(cJSON *item, const char *num); // The returned `num` is different with the input argument `num`.
 eg. input "9.01000" and return `item->valuedouble=9.009995`.
 
-# 2018-11-22
+# 2018/11/22
 1. *C guarantees that zero is never a valid address for data, so a return value of zero can be used to signal an abnormal event, in this case no space.*
 > Pointers and integers are not interchangeable. Zero is the sole exception: the constant zero may be assigned to a pointer, and a pointer may be compared with the constant zero. The symbolic constant NULL is often used in place of zero, as a mnemonic to indicate more clearly that this is a special value for a pointer. NULL is defined in <stdio.h>. 
 2. `static char *print_string_ptr(const char *str, printbuffer *p);`  // Render the cstring provided to an escaped version that can be printed.
@@ -29,7 +29,7 @@ eg. input "9.01000" and return `item->valuedouble=9.009995`.
 
 3. `print_object()` and `parse_object()`
 
-# 2018-11-27
+# 2018/11/27
 1. `sizeof(cJSON)`
 	In the original code, the size of `cJSON` is 64 because of some padding bytes. I change the order of the elements in the definition of cJSON and the size changed to 56. [reference](https://stackoverflow.com/questions/119123/why-isnt-sizeof-for-a-struct-equal-to-the-sum-of-sizeof-of-each-member)
 2. `cJSON_CreateObject()` ==> `cJSON_Object_test()`;
@@ -43,7 +43,7 @@ eg. input "9.01000" and return `item->valuedouble=9.009995`.
 * [Why 21 chars?](http://mathcentral.uregina.ca/QQ/database/QQ.02.06/trang1.html)
 
 
-# 2018-12-09
+# 2018/12/09
 1. Finished `print_string()` and collected into cJSON_Print();
 	* Don't understand `case u`;
 2. Finished `parse_string()` and `cJSON_Parse()`.
@@ -57,7 +57,13 @@ eg. input "9.01000" and return `item->valuedouble=9.009995`.
 1. `cJSON_CreateBool(int b)`
 2. `cJSON_CreateTrue(void)`
 3. `cJSON_CreateFalse(void)`
-
+4. `cJSON_CreateObject(void)`
+5. `CJSON_AddItemToObject()`
+	|-> `cJSON_free()`
+	|-> `cJSON_strdup()`
+	|-> `cJSON_AddItemToArray()`
+			|-> `suffix_object()`
+* `cJSON_Boolean_test()` & `cJSON_Object_test()`
 
 
 
