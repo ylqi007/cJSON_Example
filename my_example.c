@@ -58,6 +58,19 @@ void cJSON_String_test() {
 void cJSON_Boolean_test() {
     cJSON *b = cJSON_CreateBool(0);
     printf("%d\n", b->type);
+    cJSON *bt = cJSON_CreateTrue();
+    printf("%d\n", bt->type);
+    cJSON *bf = cJSON_CreateFalse();
+    printf("%d\n", bf->type);
+    printf("The type of bf:\t\t%d\n", bf->type);       /* In cJSON.h, #define cJSON_String 4 */
+    printf("The next element of bf:\t%p\n", (void*)bf->next);
+    printf("The prev element of bf:\t%p\n", (void*)bf->next);
+    printf("The child element of bf:\t%lu\n", (unsigned long int)bf->child);
+    printf("The type:\t\t\t%d\n", bf->type);
+    printf("The value of valutint:\t\t%d\n", bf->valueint);
+    printf("The value of valutdouble:\t%f\n", bf->valuedouble);
+    printf("The value of string:\t\t%s\n", bf->string);
+    printf("The value of valuestring:\t%s\n", bf->valuestring);
 }
 
 

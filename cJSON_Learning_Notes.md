@@ -53,16 +53,10 @@ eg. input "9.01000" and return `item->valuedouble=9.009995`.
 			|-> cJSON_Delete()
 			|-> parse_value()	==> This is a top function constaining lots of subroutines to parse different kinds of value.
 
-
-
-
-
-
-
-
-
-
-
+# 2018/12/11
+1. `cJSON_CreateBool(int b)`
+2. `cJSON_CreateTrue(void)`
+3. `cJSON_CreateFalse(void)`
 
 
 
