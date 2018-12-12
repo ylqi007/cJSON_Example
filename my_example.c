@@ -9,6 +9,7 @@
 
 char *json_buffer;
 
+/* String test. */
 void cJSON_String_test() {
     char *test_string = "Hello, Yunlong\\'s girl friend!";
     cJSON *str = cJSON_CreateString(test_string);
@@ -51,6 +52,15 @@ void cJSON_String_test() {
     printf("The value of string:\t\t%s\n", test1->string);
     printf("The value of valuestring:\t%s\n", test1->valuestring);
 }
+
+
+/* Boolean test. */
+void cJSON_Boolean_test() {
+    cJSON *b = cJSON_CreateBool(0);
+    printf("%d\n", b->type);
+}
+
+
 
 void cJSON_Object_test() {
     cJSON *root = cJSON_CreateObject();

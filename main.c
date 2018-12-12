@@ -8,7 +8,8 @@ int main()
 {
     printf("##### Hello World! #####\n\n");
     /* Create cJSON objects with different types. */
-    cJSON_String_test();
+    //cJSON_String_test();
+    cJSON_Boolean_test();
 
 
 
