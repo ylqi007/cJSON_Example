@@ -87,6 +87,23 @@ void cJSON_Object_test() {
 }
 
 
+/* Print Object test. */
+void cJSON_Print_Object_test() {
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddItemToObject(root, "Name", cJSON_CreateString("Yunlong Qi"));
+    cJSON_AddItemToObject(root, "name", cJSON_CreateString("Yinping Liu"));
+    cJSON_AddItemToObject(root, "Age", cJSON_CreateNumber(26));
+    cJSON *obj = cJSON_CreateObject();
+    cJSON_AddItemToObject(obj, "test", cJSON_CreateString("TEST"));
+    cJSON_AddItemToObject(obj, "test1", cJSON_CreateString("TEST1"));
+    cJSON_AddItemToObject(root, "obj", obj);
+//    printf("##### %s:\t%s\n", root->child->string, root->child->valuestring);
+//    printf("##### %d\n", root->type);
+    char *r = cJSON_Print(root);
+    printf("%s", r);
+}
+
+
 
 
 

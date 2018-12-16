@@ -65,6 +65,14 @@ eg. input "9.01000" and return `item->valuedouble=9.009995`.
 			|-> `suffix_object()`
 * `cJSON_Boolean_test()` & `cJSON_Object_test()`
 
+# 2018/12/15
+* `static char *print_object(cJSON *item, int depth, int fmt, printbuffer *p)`
+When I saw `*ptr=0`, I confused that this means the terminal of a string. What about the rest part? But later I saw `*ptr++='\t'`, which means that the `0` will be replaced by `\t`.
+* About `print_object()`, I did not analysis the case that `printbuffer *p` is passed into the `print_object()` function.
+* About `print_object()`, I analysised the case that `0` is passed, standard system function `malloc()` will allocate the memory needed.
+Examples are shown in my notebook.
+
+
 
 
 
