@@ -32,11 +32,23 @@
 #include <ctype.h>
 #include "cJSON.h"
 
-static const char *ep;
+typedef struct { char *buffer;  int length; int offset; } printbuffer;
 
+static const char *ep;
+const char *cJSON_GetErrorPtr(void) {return ep;}
 
 static void *(*cJSON_malloc)(size_t sz) = malloc;
 static void (*cJSON_free)(void *ptr) = free;
+
+void cJSON_InitHooks(cJSON* hooks) {
+    if(!hooks) {    /* Reset hooks. */
+        cJSON_malloc = malloc;
+        cJSON_free = free;
+    }
+
+    cJSON_malloc = (hooks->malloc_fn) ? hooks->malloc_fn : malloc;
+    cJSON_free = (hooks->free_fn) ? hooks->free_fn : free;
+}
 
 static char *cJSON_strdup(const char *str) {
     size_t len;
@@ -69,6 +81,15 @@ void cJSON_Delete(cJSON *c) {
         c = next;
     }
 }
+
+/* Replace array/object items with new ones. */
+cJSON *cJSON_CreateNumber(double num)           {cJSON *item=cJSON_New_Item(); if(item){item->type=cJSON_Number;item->valuedouble=num;item->valueint=(int)num;} return item;}
+cJSON *cJSON_CreateString(const char *string)   {cJSON *item=cJSON_New_Item(); if(item){item->type=cJSON_String;item->valuestring=cJSON_strdup(string);} return item;}
+cJSON *cJSON_CreateTrue(void)                   {cJSON *item=cJSON_New_Item(); if(item)item->type=cJSON_True; return item;}
+cJSON *cJSON_CreateFalse(void)                  {cJSON *item=cJSON_New_Item(); if(item)item->type=cJSON_False; return item;}
+cJSON *cJSON_CreateBool(int b)                  {cJSON *item=cJSON_New_Item(); if(item)item->type=b?cJSON_True:cJSON_False; return item;}
+cJSON *cJSON_CreateObject(void)                 {cJSON *item = cJSON_New_Item(); if(item)item->type = cJSON_Object;return item;}    //#define cJSON_Object 6
+
 
 /* Parse the input text to generate a number, and populate the result into item. */
 
@@ -313,6 +334,7 @@ static char *print_string(cJSON *item, printbuffer *p) { return print_string_ptr
 static const char *parse_value(cJSON *item, const char *value);
 static char *print_value(cJSON *item,int depth,int fmt,printbuffer *p);
 
+static const char *parse_object(cJSON *item, const char *value);
 static char *print_object(cJSON *item, int depth, int fmt, printbuffer *p);
 
 /* Utility to jump whitespace and cr/lf */
@@ -342,8 +364,11 @@ char *cJSON_PrintUnformatted(cJSON *item)	{return print_value(item,0,0,0);}
 
 /* Parse core - When encountering text, process appropriately. */
 static const char *parse_value(cJSON *item, const char *value) {
-    if(!value)  return 0;   /* Fail on null. */
+    if(!value)          return 0;   /* Fail on null. */
+
     if(*value=='\"')    {return parse_string(item, value);}
+    if(*value=='{')     {return parse_object(item, value);}
+    if(*value=='-' || (*value>='0' && *value<='9'))     {return parse_number(item, value);}
 
     ep=value; return 0; /* Failure. */
 }
@@ -369,6 +394,38 @@ static char *print_value(cJSON *item, int depth, int fmt, printbuffer *p) {
 }
 
 /* Build an object from the text. */
+static const char *parse_object(cJSON *item, const char *value) {
+    cJSON *child;
+    if(*value!='{') {ep=value; return 0;}   /* Not an object. */
+
+    item->type = cJSON_Object;
+    value=skip(value+1);
+    if(*value=='}') return value+1;         /* Empty array. */
+
+    item->child=child=cJSON_New_Item();
+    if(!item->child)    return 0;
+    value=skip(parse_string(child, skip(value)));
+    if(!value) return 0;
+    child->string=child->valuestring;
+    child->valuestring=0;
+    if(*value!=':') {ep=value; return 0;}   /* Fail. */
+    value=skip(parse_value(child, skip(value+1)));  /* Skip any spacing, get the value. */
+    if(!value) return 0;
+
+    while(*value==',') {
+        cJSON *new_item;
+        if(!(new_item=cJSON_New_Item()))    return 0;   /* memory fail. */
+        child->next=new_item; new_item->prev=child; child=new_item;
+        value=skip(parse_string(child, skip(value+1)));
+        if(!value) return 0;
+        child->string=child->valuestring; child->valuestring=0;
+        if(*value!=':') {ep=value; return 0;}   /* Fail. */
+        value=skip(parse_value(child, skip(value+1)));  /* skip any spacing, get the value. */
+        if(!value) return 0;
+    }
+    if(*value=='}') return value+1;     /* end of array */
+    ep=value; return 0; /* malformed. */
+}
 
 /* Render an object to text. */
 static char *print_object(cJSON *item, int depth, int fmt, printbuffer *p) {
@@ -513,11 +570,4 @@ void cJSON_AddItemToArray(cJSON *array, cJSON *item) {
 /* Add item to object. */
 void cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item) { if(!item) return;if(item->string)cJSON_free(item->string);item->string=cJSON_strdup(string);cJSON_AddItemToArray(object, item);}
 
-/* Replace array/object items with new ones. */
-cJSON *cJSON_CreateNumber(double num)           {cJSON *item=cJSON_New_Item(); if(item){item->type=cJSON_Number;item->valuedouble=num;item->valueint=(int)num;} return item;}
-cJSON *cJSON_CreateString(const char *string)   {cJSON *item=cJSON_New_Item(); if(item){item->type=cJSON_String;item->valuestring=cJSON_strdup(string);} return item;}
-cJSON *cJSON_CreateTrue(void)                   {cJSON *item=cJSON_New_Item(); if(item)item->type=cJSON_True; return item;}
-cJSON *cJSON_CreateFalse(void)                  {cJSON *item=cJSON_New_Item(); if(item)item->type=cJSON_False; return item;}
-cJSON *cJSON_CreateBool(int b)                  {cJSON *item=cJSON_New_Item(); if(item)item->type=b?cJSON_True:cJSON_False; return item;}
-cJSON *cJSON_CreateObject(void)                 {cJSON *item = cJSON_New_Item(); if(item)item->type = cJSON_Object;return item;}    //#define cJSON_Object 6
 
