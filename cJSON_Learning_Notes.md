@@ -72,6 +72,18 @@ When I saw `*ptr=0`, I confused that this means the terminal of a string. What a
 * About `print_object()`, I analysised the case that `0` is passed, standard system function `malloc()` will allocate the memory needed.
 Examples are shown in my notebook.
 
+# 2018/12/16
+* `static cJSON *cJSON_New_Item(void)`, the system allocate 56 Bytes memory for a cJSON object `node`, and set the `node` as 0, i.e. the addresses for `prev`, `next` and `child` is null, the value of valueint, valuedouble is 0...
+
+# 2018/12/18
+* `cJSON *cJSON_Parse(const char *value)`
+		|-> `cJSON *cJSON_ParseWithOpts(const char *value, const char **return_parse_end, int require_null_terminated)`
+				|-> `static const char *parse_value(cJSON *item, const char *value)`
+						|-> `static const char *parse_object(cJSON *item, const char *value)`
+								|-> `const char *parse_string(cJSON *item, const char *str)` => assign to item->string
+								|-> `const char *parse_string(cJSON *item, const char *str)` => assign to item->valuestring
+
+* `typedef struct cJSON_Hooks`: memory allocation of `cJSON`, and it provides user interface. The default function is `malloc` and `free`.
 
 
 

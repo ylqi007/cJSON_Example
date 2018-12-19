@@ -100,7 +100,13 @@ void cJSON_Print_Object_test() {
 //    printf("##### %s:\t%s\n", root->child->string, root->child->valuestring);
 //    printf("##### %d\n", root->type);
     char *r = cJSON_Print(root);
-    printf("%s", r);
+    printf("%s\n\n", r);
+
+    cJSON *root1 = cJSON_Parse(r);
+
+    printf("##### %d\n", root1->type);
+    printf("##### %s:\t%s\n", root1->child->string, root1->child->valuestring);
+    printf("The size of cJSON: %d\n", sizeof(cJSON));
 }
 
 
